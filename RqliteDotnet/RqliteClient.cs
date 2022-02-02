@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 using RqliteDotnet.Dto;
 
@@ -35,6 +36,15 @@ public class RqliteClient
         return result;
     }
 
+    public async Task Execute(string command)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/db/execute?pretty&timings");
+        request.Content = new StringContent($"[\"{command}\"]", Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(request);
+        var content = await response.Content.ReadAsStringAsync();
+    }
+
     public async Task<T> Query<T>(string query, bool getTimings = true) where T: new()
     {
         var response = await Query(query, getTimings);
@@ -54,7 +64,7 @@ public class RqliteClient
         return result;
     }
 
-    public object GetValue(string valType, JsonElement el)
+    private object GetValue(string valType, JsonElement el)
     {
         object? x = valType switch
         {
