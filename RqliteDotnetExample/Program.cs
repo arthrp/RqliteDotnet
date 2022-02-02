@@ -17,5 +17,5 @@ public static class RqliteDotnetExample
 public class FooDto
 {
     public int Id { get; set; }
-    public string Name { get; set; }
+    public string? Name { get; set; }
 }

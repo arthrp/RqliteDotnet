@@ -10,9 +10,9 @@ public class RqliteClient
 {
     private readonly HttpClient _httpClient;
 
-    public RqliteClient(string uri)
+    public RqliteClient(string uri, HttpClient? client = null)
     {
-        _httpClient = new HttpClient(){ BaseAddress = new Uri(uri) };
+        _httpClient = client ?? new HttpClient(){ BaseAddress = new Uri(uri) };
     }
 
     public async Task<string> Ping()
