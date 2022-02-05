@@ -12,7 +12,8 @@ namespace RqliteDotnet.Test;
 
 public static class HttpClientMock
 {
-    public static HttpClient Get()
+    private const string BASE_URL = "http://localhost:6000";
+    public static HttpClient GetQueryMock()
     {
         var fileContent = GetContents();
         var handlerMock = new Mock<HttpMessageHandler>();
@@ -26,7 +27,7 @@ public static class HttpClientMock
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(fileContent)
             });
-        var client = new HttpClient(handlerMock.Object){ BaseAddress = new Uri("http://localhost:6000") };
+        var client = new HttpClient(handlerMock.Object){ BaseAddress = new Uri(BASE_URL) };
 
         return client;
     }

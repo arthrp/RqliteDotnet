@@ -13,7 +13,7 @@ public class RqliteClientTests
     [Test]
     public async Task BasicQuery_Works()
     {
-        var client = HttpClientMock.Get();
+        var client = HttpClientMock.GetQueryMock();
 
         var rqClient = new RqliteClient("http://localhost:6000", client);
         var queryresult = await rqClient.Query("select * from foo");
