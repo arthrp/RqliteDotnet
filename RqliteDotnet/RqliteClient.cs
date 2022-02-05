@@ -50,6 +50,8 @@ public class RqliteClient
         var response = await Query(query, getTimings);
         if (response.Results.Count > 1)
             throw new DataException("Query returned more than 1 result. At the moment only 1 result supported");
+        if (!string.IsNullOrEmpty(response.Results[0].Error))
+            throw new InvalidOperationException(response.Results[0].Error);
         var result = new T();
 
         foreach (var prop in typeof(T).GetProperties())
