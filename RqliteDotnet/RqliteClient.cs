@@ -36,13 +36,16 @@ public class RqliteClient
         return result;
     }
 
-    public async Task Execute(string command)
+    public async Task<ExecuteResults> Execute(string command)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "/db/execute?pretty&timings");
         request.Content = new StringContent($"[\"{command}\"]", Encoding.UTF8, "application/json");
 
         var response = await _httpClient.SendAsync(request);
         var content = await response.Content.ReadAsStringAsync();
+
+        var result = JsonSerializer.Deserialize<ExecuteResults>(content, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        return result;
     }
 
     public async Task<T> Query<T>(string query, bool getTimings = true) where T: new()

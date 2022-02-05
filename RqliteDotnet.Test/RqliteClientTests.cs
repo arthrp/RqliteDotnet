@@ -25,4 +25,17 @@ public class RqliteClientTests
         Assert.AreEqual(2, queryresult.Results[0].Types.Count);
         Assert.AreEqual(1, queryresult.Results[0].Values.Count);
     }
+
+    [Test]
+    public async Task BasicExecute_Works()
+    {
+        var client = HttpClientMock.GetExecuteMock();
+
+        var rqClient = new RqliteClient("http://localhost:6000", client);
+        var result = await rqClient.Execute("create table newfoo (id integer primary key not null)");
+        
+        Assert.AreEqual(1, result.Results.Count);
+        Assert.AreEqual(1, result.Results[0].RowsAffected);
+        Assert.AreEqual(2, result.Results[0].LastInsertId);
+    }
 }

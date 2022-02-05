@@ -18,6 +18,8 @@
     <ItemGroup>
       <None Remove="DbQueryResponse.json" />
       <EmbeddedResource Include="DbQueryResponse.json" />
+      <None Remove="DbExecuteResponse.json" />
+      <EmbeddedResource Include="DbExecuteResponse.json" />
     </ItemGroup>
 
     <ItemGroup>

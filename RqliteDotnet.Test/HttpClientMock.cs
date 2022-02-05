@@ -32,11 +32,39 @@ public static class HttpClientMock
         return client;
     }
 
+    public static HttpClient GetExecuteMock()
+    {
+        var fileContent = GetExecuteResponseContents();
+        var handlerMock = new Mock<HttpMessageHandler>();
+        handlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", 
+                ItExpr.Is<HttpRequestMessage>(s => s.Method == HttpMethod.Post),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(fileContent)
+            });
+        var client = new HttpClient(handlerMock.Object){ BaseAddress = new Uri(BASE_URL) };
+
+        return client;
+    }
+
     private static string GetContents()
     {
+        return ReadResource("RqliteDotnet.Test.DbQueryResponse.json");
+    }
+
+    private static string GetExecuteResponseContents()
+    {
+        return ReadResource("RqliteDotnet.Test.DbExecuteResponse.json");
+    }
+
+    private static string ReadResource(string resourceName)
+    {
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = "RqliteDotnet.Test.DbQueryResponse.json";
-        
+
         using (Stream stream = assembly.GetManifestResourceStream(resourceName))
         using (StreamReader reader = new StreamReader(stream))
         {
