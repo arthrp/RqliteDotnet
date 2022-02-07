@@ -22,12 +22,10 @@ public class RqliteClient
         return x.Headers.GetValues("X-Rqlite-Version").FirstOrDefault();
     }
 
-    public async Task<QueryResults> Query(string query, bool getTimings = false)
+    public async Task<QueryResults> Query(string query)
     {
         var data = "&q="+Uri.EscapeDataString(query);
-        var baseUrl = "/db/query?pretty";
-
-        baseUrl = (getTimings) ? $"{baseUrl}&timings" : baseUrl;
+        var baseUrl = "/db/query?pretty&timings";
 
         var r = await _httpClient.GetAsync($"{baseUrl}&{data}");
         var str = await r.Content.ReadAsStringAsync();
@@ -69,9 +67,9 @@ public class RqliteClient
         return result;
     }
 
-    public async Task<T> Query<T>(string query, bool getTimings = true) where T: new()
+    public async Task<T> Query<T>(string query) where T: new()
     {
-        var response = await Query(query, getTimings);
+        var response = await Query(query);
         if (response.Results.Count > 1)
             throw new DataException("Query returned more than 1 result. At the moment only 1 result supported");
         if (!string.IsNullOrEmpty(response.Results[0].Error))
