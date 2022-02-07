@@ -5,11 +5,6 @@ namespace RqliteDotnet.Test;
 
 public class RqliteClientTests
 {
-    [SetUp]
-    public void Setup()
-    {
-    }
-
     [Test]
     public async Task BasicQuery_Works()
     {
@@ -27,6 +22,19 @@ public class RqliteClientTests
     }
 
     [Test]
+    public async Task QueryWithGenerics_Works()
+    {
+        var client = HttpClientMock.GetQueryMock();
+
+        var rqClient = new RqliteClient("http://localhost:6000", client);
+        var queryresults = await rqClient.Query<FooResultDto>("select * from foo");
+        
+        Assert.AreEqual(1, queryresults.Count);
+        Assert.AreEqual(1, queryresults[0].Id);
+        Assert.AreEqual("john", queryresults[0].Name);
+    }
+
+    [Test]
     public async Task BasicExecute_Works()
     {
         var client = HttpClientMock.GetExecuteMock();
@@ -38,4 +46,10 @@ public class RqliteClientTests
         Assert.AreEqual(1, result.Results[0].RowsAffected);
         Assert.AreEqual(2, result.Results[0].LastInsertId);
     }
+}
+
+public class FooResultDto
+{
+    public int Id { get; set; }
+    public string? Name { get; set; }
 }

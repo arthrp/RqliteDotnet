@@ -67,24 +67,33 @@ public class RqliteClient
         return result;
     }
 
-    public async Task<T> Query<T>(string query) where T: new()
+    public async Task<List<T>> Query<T>(string query) where T: new()
     {
         var response = await Query(query);
         if (response.Results.Count > 1)
             throw new DataException("Query returned more than 1 result. At the moment only 1 result supported");
-        if (!string.IsNullOrEmpty(response.Results[0].Error))
-            throw new InvalidOperationException(response.Results[0].Error);
-        var result = new T();
-
-        foreach (var prop in typeof(T).GetProperties())
-        {
-            var index = response.Results[0].Columns.FindIndex(c => c.ToLower() == prop.Name.ToLower());
-            var x = GetValue(response.Results[0].Types[index], response.Results[0].Values[0][index]);
-            
-            prop.SetValue(result, x);
-        }
+        var res = response.Results[0];
         
-        return result;
+        if (!string.IsNullOrEmpty(res.Error))
+            throw new InvalidOperationException(res.Error);
+        var list = new List<T>();
+
+        for (int i = 0; i < res.Values.Count; i++)
+        {
+            var dto = new T();
+
+            foreach (var prop in typeof(T).GetProperties())
+            {
+                var index = res.Columns.FindIndex(c => c.ToLower() == prop.Name.ToLower());
+                var x = GetValue(res.Types[index], res.Values[i][index]);
+            
+                prop.SetValue(dto, x);
+            }
+            
+            list.Add(dto);
+        }
+
+        return list;
     }
 
     private object GetValue(string valType, JsonElement el)
