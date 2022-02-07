@@ -47,6 +47,27 @@ public class RqliteClient
         var result = JsonSerializer.Deserialize<ExecuteResults>(content, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
         return result;
     }
+    
+    public async Task<QueryResults> QueryParams(string query, params QueryParameter[] qps)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/db/query?pretty&timings");
+        var sb = new StringBuilder($"[[\"{query}\",");
+
+        foreach (var qp in qps)
+        {
+            sb.Append(qp.ParamType == QueryParamType.Number ? qp.Value : $"\"{qp.Value}\"" + ",");
+        }
+
+        sb.Length -= 1;
+        sb.Append("]]");
+
+        request.Content = new StringContent(sb.ToString(), Encoding.UTF8, "application/json");
+        var r = await _httpClient.SendAsync(request);
+        var content = await r.Content.ReadAsStringAsync();
+
+        var result = JsonSerializer.Deserialize<QueryResults>(content, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        return result;
+    }
 
     public async Task<T> Query<T>(string query, bool getTimings = true) where T: new()
     {
@@ -60,7 +81,6 @@ public class RqliteClient
         foreach (var prop in typeof(T).GetProperties())
         {
             var index = response.Results[0].Columns.FindIndex(c => c.ToLower() == prop.Name.ToLower());
-            var typ = prop.PropertyType;
             var x = GetValue(response.Results[0].Types[index], response.Results[0].Values[0][index]);
             
             prop.SetValue(result, x);
